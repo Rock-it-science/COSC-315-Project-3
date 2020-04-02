@@ -14,18 +14,13 @@ int main(){
     int m;  /* the next m bits that represent the page number; assume that n+m is always 16 */
     fscanf(f, "%d", &m);
 
-    char cmask[16];
-    for(int i=0; i<16; i++){
-        if(i<m){
-            cmask[i] = 0;
-        } else{
-            cmask[i] = 1;
-        }
-    }
-    int mask = atoi(cmask);
+    printf("Offset within page is %d bits, which can represent %d decimal numbers\n", n, 2<<n);
+    printf("Page number is %d bits, which can represent %d decimal numbers\n", m, 2<<m);
+
+    int mask = (2<<n) - 1;
 
     //Continue to read until end of file
-    char buffer[sizeof(int)];
+    char buffer[sizeof(int)*2];
     int v, p, d;
     while(fscanf(f, "%s", buffer) == 1){
         v = atoi(buffer);
@@ -33,9 +28,13 @@ int main(){
         // Logical AND with m 0s and n 1s
         d = v & mask;
 
-        //Shift v right by n to get the m most significant bits (page)
+        //Shift v right by n to get the m most significant bits (page number)
         p = v >> n;
 
         printf("Virtual address %d is in page number %d and offset %d\n", v, p, d);
     }
+
+    fclose(f);
+    
+    return 0;
 }
