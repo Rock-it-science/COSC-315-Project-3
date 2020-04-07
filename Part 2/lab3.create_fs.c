@@ -28,11 +28,11 @@ int main(int argc, char *argv[])
   
   /* write super block */
   buf[0]=1;  /* mark superblock as allocated in the free block list 
-                         all other blocks are free, all inodes are zeroed out */
+                all other blocks are free, all inodes are zeroed out */
 
   /* write out the super block */
   if(write(fd,buf, 1024)<0)
-    printf("error: write failed \n");  
+    printf("error: write failed \n");
 
   buf[0]=0;
   /* write out the remaining 127 data blocks, all zeroed out */

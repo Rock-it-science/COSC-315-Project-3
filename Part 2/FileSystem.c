@@ -1,6 +1,15 @@
 void myFileSystem(char diskName){
 	// Open the file with name diskName
-   
+    int fd;
+    char* buf;
+    fd = open(argv[1], O_RDONLY, S_IRUSR);
+    int nodeNum;
+    for (int i = 0; i < 16; i++)
+    {
+        if (buf[i].name == diskName) {
+            nodeNum = i;
+        }
+    }
    // Read the first 1KB and parse it to structs/objecs representing the super block
    // 	An easy way to work with the 1KB memory chunk is to move a pointer to a
    //	position where a struct/object begins. You can use the sizeof operator to help
@@ -51,25 +60,48 @@ int delete(char name[8]){
 
 int ls(){
 	// List names of all files on disk
-
+    int fd;
+    char* buf;
+    fd = open(argv[1], O_RDONLY, S_IRUSR);
+    for (int i = 0; i < 16; i++)
+    {
+        if (buf[i].name != nullptr) {
+            printf(buf[i].name +" " +buf[i].name);
+        }
+    }
   // Print the name and size fields of all used inodes.
 }
 
 int read(char name[8], long int blockNum, char buf[1024]){
    // read this block from this file
+    int fd;
+    char* buf;
+    fd = open(argv[1], O_RDONLY, S_IRUSR);
+    int nodeNum;
+    for (int i = 0; i < 16; i++)
+    {
+        if (buf[i].name == diskName) {
+            nodeNum = i;
+        }
+    }
    // Return an error if and when appropriate. For instance, make sure
    // blockNum does not exceed size-1.
-
+    if (blockNum < buf[nodeNum].size)
+        return 1;//Trying to access block that doesn't exist
    // Step 1: Locate the inode for this file as in Step 1 of delete.
-
    // Step 2: Seek to blockPointers[blockNum] and read the block
    // from disk to buf.
+   return 0;//file read
 }
 
 int write(char name[8], long int blockNum, char buf[1024]){
    // write this block to this file
+    int fd;
+    char* buf;
+    fd = open(argv[1], O_WRONLY | O_TRUNC, S_IWUSR);
    // Return an error if and when appropriate.
-
+   //Find empty location
+   
    // Step 1: Locate the inode for this file as in Step 1 of delete.
 
    // Step 2: Seek to blockPointers[blockNum] and write buf to disk.
@@ -79,3 +111,9 @@ int main(int argc, char *argv[]){
 
 	return 0;
 }
+
+struct iNode
+{
+    char name[8];
+    __int32 size, blockPointers[8], used;
+};
