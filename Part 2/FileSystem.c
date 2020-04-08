@@ -21,7 +21,7 @@ void printHex(unsigned char data[], int size) { //prints to console for testing 
     }
     printf("\nPrinting Complete\n");
 }
-//global varirable for list of inodes
+//global variable for list of inodes
 struct inode inodes[16];
 FILE * file;
 void myFileSystem(char* diskName){
@@ -42,34 +42,66 @@ void myFileSystem(char* diskName){
     //	cleanly determine the position. Next, cast the pointer to a pointer of the
     //	struct/object type.
     long readSize = 1024;
-    unsigned char buffer[readSize];
+    unsigned char superBlock[readSize];
     size_t result;
     printf("Storing start:\n");
-    result = fread(buffer, 1, readSize, file);
+    result = fread(superBlock, 1, readSize, file);
     if(result != readSize) {
         printf("Read 1024 Error\n");
         exit(1);
     }
     printf("Storing complete:\n");
 
-    printHex(buffer,readSize);
+    printHex(superBlock,readSize);
 
     
 
     printf("Reading inode start:\n");
     printf("%i\n",sizeof(inodes));
 
+    int readLocation = 128; // 128 for free block list
+
     for(int i = 0; i < 16; i++) {
-        int readLocation = 0;
-        readLocation += 128; //free block list
-        readLocation += i*48;//each inode
         char readName[8];
         for(int iname = 0; i < 8; i++) {
-            readName[iname] = buffer[readLocation+iname];
+            readName[iname] = superBlock[readLocation+iname];
         }
         readLocation += 8; //name
+
         int32_t readSize;
-        
+        char readSizeChar[4];
+        for(int isize = 0; i < 4; i++) {
+            readSizeChar[isize] = superBlock[readLocation + isize];
+        }
+        char* ptr;
+        readSize = strtol(readSizeChar, &ptr, 2);
+        readLocation += 4; //size
+
+        int32_t readBlockPointers[8];
+        for(int iBlockPointers1 = 0; iBlockPointers1 < 8; iBlockPointers1++) {
+            char readBlockPointersChar[4];
+            for(int iBlockPointers2 = 0; iBlockPointers2 < 4; iBlockPointers2++) {
+                readBlockPointersChar[iBlockPointers2] = superBlock[readLocation + iBlockPointers2 + (iBlockPointers1*4)];
+            }
+            char* ptr;
+            readBlockPointers[iBlockPointers1] = strtol(readBlockPointersChar, &ptr, 2);
+        }
+        readLocation += 32; //BlockPointers
+
+        int32_t readUsed;
+        char readUsedChar[4];
+        for(int iUsed = 0; iUsed < 4; iUsed++) {
+            readUsedChar[iUsed] = superBlock[readLocation + iUsed];
+        }
+        char* ptr2;
+        readUsed = strtol(readUsedChar, &ptr2, 2);
+        readLocation +=4; //Used
+
+        inodes[i].name = readName;
+        inodes[i].size = readSize;
+        inodes[i].blockPointers = readBlockPointers;
+        inodes[i].used = readUsed;
+
 
 
     }
@@ -153,8 +185,8 @@ int write(char name[8], long int blockNum, char buf[1024]){
 
 
 
-//main arguments: int argc, char *argv[]        moved here for testing
-int main(){
+//main arguments:         moved here for testing
+int main(int argc, char *argv[]){
     char diskName[] = "disk0";
     myFileSystem(diskName);
 
