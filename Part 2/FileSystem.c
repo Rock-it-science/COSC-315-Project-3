@@ -44,7 +44,21 @@ int create(char name[8], long int size){
 
 int delete(char name[8]){
 	// Delete the file with this name
-
+    FILE* writer;
+    writer = fopen("filesys.bin", "rb");
+    fread(buf, sizeof(buf), 1, reader);
+    //=====================Need to get inode list and free block list=================
+    int nodeNum;
+    for (int i = 0; i < length; i++)
+    {
+        if (iList[i].name == name) {
+            nodeNum = i;//save iNode number if empty
+            break;
+        }
+        return -1;//No file with that name found
+    }
+    writer = fopen("filesys.bin", "wb");//write to filesys.bin in binary
+    fwrite(buf, sizeof(buf), 1, writer);//write 1KB from the buffer
   // Step 1: Look for an inode that is in use with given name
   // by searching the collection of objects
   // representing inodes within the super block object.
@@ -65,7 +79,7 @@ int ls(){
     fd = open(argv[1], O_RDONLY, S_IRUSR);
     for (int i = 0; i < 16; i++)
     {
-        if (buf[i].name != nullptr) {
+        if (buf[i].used==1) {
             printf(buf[i].name +" " +buf[i].name);
         }
     }
@@ -74,20 +88,21 @@ int ls(){
 
 int read(char name[8], long int blockNum, char buf[1024]){
    // read this block from this file
-    int fd;
-    char* buf;
-    fd = open(argv[1], O_RDONLY, S_IRUSR);
+    FILE* reader;
+    reader = fopen("filesys.bin", "rb");
+    fread(buf, sizeof(buf), 1, reader);
     int nodeNum;
     for (int i = 0; i < 16; i++)
     {
-        if (buf[i].name == diskName) {
+        if (iList[i].name == name) {//find inode with this name
             nodeNum = i;
+            break;
         }
     }
    // Return an error if and when appropriate. For instance, make sure
    // blockNum does not exceed size-1.
-    if (blockNum < buf[nodeNum].size)
-        return 1;//Trying to access block that doesn't exist
+    if (blockNum < iList[nodeNum].size)
+        return -1;//Trying to access block that doesn't exist
    // Step 1: Locate the inode for this file as in Step 1 of delete.
    // Step 2: Seek to blockPointers[blockNum] and read the block
    // from disk to buf.
@@ -96,10 +111,22 @@ int read(char name[8], long int blockNum, char buf[1024]){
 
 int write(char name[8], long int blockNum, char buf[1024]){
    // write this block to this file
-    int fd;
-    char* buf;
-    fd = open(argv[1], O_WRONLY | O_TRUNC, S_IWUSR);
-   // Return an error if and when appropriate.
+   FILE* writer;
+   writer = fopen("filesys.bin", "rb");
+   fread(buf, sizeof(buf), 1, reader);
+   //=====================Need to get inode list and free block list=================
+   int nodeNum;
+   for (int i = 0; i < length; i++)
+   {
+       if (iList[i].used == 0) {
+           nodeNum = i;//save iNode number if empty
+           break;
+       }
+       return -1;//No empty iNode
+   }
+   writer = fopen("filesys.bin", "wb");//write to filesys.bin in binary
+   fwrite(buf, sizeof(buf), 1, writer);//write 1KB from the buffer
+   //Return an error if and when appropriate.
    //Find empty location
    
    // Step 1: Locate the inode for this file as in Step 1 of delete.
@@ -108,12 +135,5 @@ int write(char name[8], long int blockNum, char buf[1024]){
 }
 
 int main(int argc, char *argv[]){
-
 	return 0;
 }
-
-struct iNode
-{
-    char name[8];
-    __int32 size, blockPointers[8], used;
-};
