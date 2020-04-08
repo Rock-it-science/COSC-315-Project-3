@@ -3,6 +3,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <stdbool.h>
+#include <string.h>
 
 
 struct inode {
@@ -24,6 +26,7 @@ void printHex(unsigned char data[], int size) { //prints to console for testing 
 //global variable for list of inodes
 struct inode inodes[16];
 FILE * file;
+
 void myFileSystem(char* diskName){
     printf("myFileSystem start:\n");
     printf("%s\n",diskName);
@@ -101,9 +104,6 @@ void myFileSystem(char* diskName){
         inodes[i].size = readSize;
         inodes[i].blockPointers = readBlockPointers;
         inodes[i].used = readUsed;
-
-
-
     }
 
 
@@ -126,12 +126,63 @@ int create(char name[8], long int size){
     // If none exist, then return an error.
     // Also make sure that no other file in use with the same name exists.
 
+    bool found = false;
+    int toUse = 0;
+    for(int i = 0; i < 16 || found; i++) {
+        if(inodes[i].used == 0) {
+            toUse = i;
+            found = true;
+        }
+    }
+    if(found) {
+        printf("No Empty inode found");
+        exit(1);
+    }
+    for(int i = 0; i < 16; i++) {
+        if(0 == strcmp(inodes[i].name,name)) {
+            printf("File name Exists");
+            exit(1);
+        }
+    }
+
+
     // Step 2: Look for a number of free blocks equal to the size variable
     // passed to this method. If not enough free blocks exist, then return an error.
+    fseek(file, 0, SEEK_SET);
+    long readSize = 128;
+    unsigned char freeBlock[readSize];
+    size_t result;
+    result = fread(freeBlock, 1, readSize, file);
+    if(result != readSize) {
+        printf("Read free Error\n");
+        exit(1);
+    }
+
+    int freeBlocks = 0;
+    bool foundAll;
+    int blocksToWrite[size];
+    for(int i = 0; (i < 128) || (freeBlocks == size); i++) {
+        if(freeBlock[i] == 0) {
+            blocksToWrite[freeBlocks] = i;
+            freeBlocks++;
+        }
+    }
+    if(freeBlocks != size) {
+        printf("Not enough Free Blocks");
+        exit(1);
+    }
+
+    
 
     // Step 3: Now we know we have an inode and free blocks necessary to
     // create the file. So mark the inode and blocks as used and update the rest of
     // the information in the inode.
+
+    inodes[toUse].used = 1;
+    inodes[toUse].size = size;
+    for(int i = 0; i < size; i++) {
+        inodes[toUse].blockPointers[i] = blocksToWrite[i];
+    }
 
     // Step 4: Write the entire super block back to disk.
     //	An easy way to do this is to seek to the beginning of the disk
