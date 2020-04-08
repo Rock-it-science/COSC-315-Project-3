@@ -206,7 +206,8 @@ int create(char name[8], long int size){
         writeLocation += 8;
 
         unsigned char writeSize[4];
-        itoa(inodes[i].size,writeSize,2);
+        //itoa(inodes[i].size,writeSize,2);
+        snprintf(writeSize,4,"%d",inodes[i].size);
         for(int isize = 0; isize < 4; isize++) {
             toWrite[writeLocation + isize] = writeSize[i];
         }
@@ -214,7 +215,8 @@ int create(char name[8], long int size){
 
         for(int iBlockPointers1 = 0; iBlockPointers1 < 8; iBlockPointers1++) {
             unsigned char writeBlockPointers[4];
-            itoa(inodes[i].blockPointers[iBlockPointers1], writeBlockPointers,2);
+            //itoa(inodes[i].blockPointers[iBlockPointers1], writeBlockPointers,2);
+            snprintf(writeBlockPointers,4,"%d",inodes[i].blockPointers[iBlockPointers1]);
             for(int iBlockPointers2; iBlockPointers2 < 4; iBlockPointers2++) {
                 toWrite[writeLocation + iBlockPointers2 + (iBlockPointers1*4)] = writeBlockPointers[iBlockPointers2];
             }
@@ -222,7 +224,8 @@ int create(char name[8], long int size){
         writeLocation += 32;
 
         unsigned char writeUsed[4];
-        itoa(inodes[i].used,writeUsed,2);
+        //itoa(inodes[i].used,writeUsed,2);
+        snprintf(writeUsed,4,"%d",inodes[i].used);
         for(int iused = 0; iused < 4; iused++) {
             toWrite[writeLocation + iused] = writeUsed[iused];
         }
