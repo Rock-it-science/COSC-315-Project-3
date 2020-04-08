@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <string.h>
 
 
 struct inode {
@@ -97,9 +98,9 @@ void myFileSystem(char* diskName){
         readUsed = strtol(readUsedChar, &ptr2, 2);
         readLocation +=4; //Used
 
-        inodes[i].name = readName;
+        strcpy(inodes[i].name, readName);
         inodes[i].size = readSize;
-        inodes[i].blockPointers = readBlockPointers;
+        memcpy(inodes[i].blockPointers, readBlockPointers, sizeof(readBlockPointers));
         inodes[i].used = readUsed;
 
 
