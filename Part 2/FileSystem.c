@@ -8,7 +8,7 @@
 
 
 struct inode {
-    char name[8];
+    unsigned char name[8];
     int32_t size;
     int32_t blockPointers[8];
     int32_t used;
@@ -72,14 +72,14 @@ void myFileSystem(char* diskName){
 
     for(int i = 0; i < 16; i++) {
         char readName[8];
-        for(int iname = 0; i < 8; i++) {
+        for(int iname = 0; iname < 8; iname++) {
             readName[iname] = superBlock[readLocation+iname];
         }
         readLocation += 8; //name
 
         int32_t readSize;
         char readSizeChar[4];
-        for(int isize = 0; i < 4; i++) {
+        for(int isize = 0; isize < 4; isize++) {
             readSizeChar[isize] = superBlock[readLocation + isize];
         }
         char* ptr;
@@ -162,7 +162,7 @@ int create(char name[8], long int size){
 
     int freeBlocks = 0;
     bool foundAll;
-    int blocksToWrite[size];
+    int32_t blocksToWrite[size];
     for(int i = 0; (i < 128) || (freeBlocks == size); i++) {
         if(freeBlock[i] == 0) {
             blocksToWrite[freeBlocks] = i;
@@ -180,6 +180,7 @@ int create(char name[8], long int size){
     // create the file. So mark the inode and blocks as used and update the rest of
     // the information in the inode.
 
+    strcpy(inodes[toUse].name, name);
     inodes[toUse].used = 1;
     inodes[toUse].size = size;
     for(int i = 0; i < size; i++) {
@@ -189,6 +190,48 @@ int create(char name[8], long int size){
     // Step 4: Write the entire super block back to disk.
     //	An easy way to do this is to seek to the beginning of the disk
     //	and write the 1KB memory chunk.
+
+    unsigned char toWrite[1024];
+    for(int i = 0; i < size; i++) {
+        freeBlock[blocksToWrite[i]] = (unsigned char)1;
+    }
+    for(int i = 0; i < 128; i++) {
+        toWrite[i] = freeBlock[i];
+    }
+    int writeLocation = 128;
+    for(int i = 0; i < 16; i++) {
+        for(int iname = 0; iname < 8; iname++) {
+            toWrite[writeLocation + iname] = inodes[i].name[iname];
+        }
+        writeLocation += 8;
+
+        unsigned char writeSize[4];
+        itoa(inodes[i].size,writeSize,2);
+        for(int isize = 0; isize < 4; isize++) {
+            toWrite[writeLocation + isize] = writeSize[i];
+        }
+        writeLocation +=4;
+
+        for(int iBlockPointers1 = 0; iBlockPointers1 < 8; iBlockPointers1++) {
+            unsigned char writeBlockPointers[4];
+            itoa(inodes[i].blockPointers[iBlockPointers1], writeBlockPointers,2);
+            for(int iBlockPointers2; iBlockPointers2 < 4; iBlockPointers2++) {
+                toWrite[writeLocation + iBlockPointers2 + (iBlockPointers1*4)] = writeBlockPointers[iBlockPointers2];
+            }
+        }
+        writeLocation += 32;
+
+        unsigned char writeUsed[4];
+        itoa(inodes[i].used,writeUsed,2);
+        for(int iused = 0; iused < 4; iused++) {
+            toWrite[writeLocation + iused] = writeUsed[iused];
+        }
+        writeLocation += 4;
+    }
+
+    fseek(file, 0, SEEK_SET);
+    fputs(toWrite, file);
+
     return 1;
 }
 
