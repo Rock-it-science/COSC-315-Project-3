@@ -41,11 +41,14 @@ void myFileSystem(char* diskName){
         exit(1);
     }
     printf("Read Complete \n");
+    
     // Read the first 1KB and parse it to structs/objecs representing the super block
     // 	An easy way to work with the 1KB memory chunk is to move a pointer to a
     //	position where a struct/object begins. You can use the sizeof operator to help
     //	cleanly determine the position. Next, cast the pointer to a pointer of the
     //	struct/object type.
+
+
     long readSize = 1024;
     unsigned char superBlock[readSize];
     size_t result;
@@ -62,7 +65,7 @@ void myFileSystem(char* diskName){
     
 
     printf("Reading inode start:\n");
-    printf("%i\n",sizeof(inodes));
+    printf("%li\n",sizeof(inodes));
 
     int readLocation = 128; // 128 for free block list
 
@@ -142,18 +145,42 @@ int create(char name[8], long int size){
 int delete(char name[8]){
     // Delete the file with this name
 
+    //Step 0: read super block
+    char super[896];
+    fread(super, 1, 128, file);
+
     // Step 1: Look for an inode that is in use with given name
     // by searching the collection of objects
     // representing inodes within the super block object.
     // If it does not exist, then return an error.
+    
 
+        int in = -1;
+        
+        //Look for inode with matching name
+        for(int i=0; i<16; i++){
+            if(inodes[i].name == name){
+                in = i;
+            }
+        }
+        //if in is still -1 (inode not found)
+        if(in == -1){
+            printf("Could not find inode with matching name\n");
+        }
 
     // Step 2: Free blocks of the file being deleted by updating
     // the object representing the free block list in the super block object.
+        for(int i=in; i<in+inodes[in].size; i++){
+            super[i] = 0;
+        }
 
     // Step 3: Mark inode as free.
+        //fbl = 128B, each inode = 48B, size is 9th byte in inode
+        super[128+(in*48)+9] = 0;
 
     // Step 4: Write the entire super block back to disk.
+        fseek(file, 0, SEEK_SET); //Move cursor to start of file
+        fputs(super, file);
 }
 
 int ls(){
@@ -191,7 +218,4 @@ int write(char name[8], long int blockNum, char buf[1024]){
 int main(int argc, char *argv[]){
     char diskName[] = "disk0";
     myFileSystem(diskName);
-
-
-
 }
