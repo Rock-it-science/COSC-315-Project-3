@@ -6,8 +6,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-int
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
   int i, fd;
   char *buf;
@@ -29,20 +28,29 @@ main(int argc, char *argv[])
   
   /* write super block */
   buf[0]=1;  /* mark superblock as allocated in the free block list 
-                         all other blocks are free, all inodes are zeroed out */
+                all other blocks are free, all inodes are zeroed out */
 
   /* write out the super block */
-  if(write(fd,buf, 1024)<0)
-    printf("error: write failed \n");  
+  //=======write free block list======
+  iNode iList[16];
+  if(write(sprblk, 0, buf)<0)
+    printf("error: write failed \n");
 
   buf[0]=0;
   /* write out the remaining 127 data blocks, all zeroed out */
-  for(i=0;i<127;i++){
-    if(write(fd,buf,1024)<0)
-      printf("error: write failed \n");  
+  for(i=1;i<127;i++){
+      if (write(fd, i, buf) < 0)
+          printf("error: write failed \n");
+      else
+          buf[i] = 0;
   }
 
   close(fd);
   exit(1);
 
 }
+struct iNode
+{
+    char name[8];
+    __int32 size, blockPointers[8], used;
+};
