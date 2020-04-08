@@ -140,6 +140,7 @@ int create(char name[8], long int size){
     // Step 4: Write the entire super block back to disk.
     //	An easy way to do this is to seek to the beginning of the disk
     //	and write the 1KB memory chunk.
+    return 1;
 }
 
 int delete(char name[8]){
@@ -182,16 +183,16 @@ int delete(char name[8]){
     // Step 4: Write the entire super block back to disk.
         fseek(file, 0, SEEK_SET); //Move cursor to start of file
         fputs(super, file);
+    return 1;
 }
 
 int ls(){
 	printf("Files in system:");
-    int readLocation = 128; // ignore free block list
     for(int i = 0; i < 16; i++) {
 		if(inodes[i].used==1)
 			printf("%s %d%s\n", inodes[i].name, inodes[i].size,"BYTES");
     }
-	return 0;
+	return 1;
 }
 
 int read(char name[8], long int blockNum, char buf[1024]){
@@ -212,16 +213,15 @@ int read(char name[8], long int blockNum, char buf[1024]){
 		return -1;
     }
 	//if invalid blocknum
-	if(blockNum>7 || inodes[in].blockPointers[blockNum]==null) {
+	if(blockNum>7 || &inodes[in].blockPointers[blockNum] == NULL) {
 		printf("Invalid block number\n");
 		return -1;
 	}
 	//if block exists, read from file
-    int readLocation = inodes[in].blockPointers[blockNum]; //go to pointer
 	
 	//check if block is potentially less than 1KB
 	long readSize;
-	if(inodes[in].blockPointers[blockNum+1]==null || blockNum == 7)
+	if(&inodes[in].blockPointers[blockNum+1]== NULL || blockNum == 7)
 		readSize = inodes[in].size - (blockNum*1024); //get the leftover block size =================================================pls check calculation
 	else
 		readSize = 1024;
@@ -233,7 +233,7 @@ int read(char name[8], long int blockNum, char buf[1024]){
         printf("Read 1024 Error\n");
         exit(1);
     }
-    return 0;
+    return 1;
 }
 
 int write(char name[8], long int blockNum, char buf[1024]){
@@ -258,6 +258,8 @@ int write(char name[8], long int blockNum, char buf[1024]){
         int blockPtr = inodes[in].blockPointers[blockNum];
         fseek(file, blockPtr, SEEK_SET);
         fputs(buf, file);
+
+    return 1;
 }
 
 
