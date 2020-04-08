@@ -22,9 +22,13 @@ void printHex(unsigned char data[], int size) { //prints to console for testing 
     }
     printf("\nPrinting Complete\n");
 }
+
 //global variable for list of inodes
 struct inode inodes[16];
-FILE * file;
+
+//Global file
+FILE* file;
+
 void myFileSystem(char* diskName){
     printf("myFileSystem start:\n");
     printf("%s\n",diskName);
@@ -98,6 +102,7 @@ void myFileSystem(char* diskName){
         readUsed = strtol(readUsedChar, &ptr2, 2);
         readLocation +=4; //Used
 
+        //Store function values to inode
         strcpy(inodes[i].name, readName);
         inodes[i].size = readSize;
         memcpy(inodes[i].blockPointers, readBlockPointers, sizeof(readBlockPointers));
@@ -106,15 +111,10 @@ void myFileSystem(char* diskName){
 
 
     }
-
-
-
-
-    fclose(file);
     
-
     // Be sure to close the file in a destructor or otherwise before
     // the process exits.
+    fclose(file);
 }
 
 int create(char name[8], long int size){
@@ -146,6 +146,7 @@ int delete(char name[8]){
     // by searching the collection of objects
     // representing inodes within the super block object.
     // If it does not exist, then return an error.
+
 
     // Step 2: Free blocks of the file being deleted by updating
     // the object representing the free block list in the super block object.
