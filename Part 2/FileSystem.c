@@ -166,6 +166,7 @@ int delete(char name[8]){
         //if in is still -1 (inode not found)
         if(in == -1){
             printf("Could not find inode with matching name\n");
+            return 0;
         }
 
     // Step 2: Free blocks of the file being deleted by updating
@@ -205,8 +206,23 @@ int write(char name[8], long int blockNum, char buf[1024]){
     // Return an error if and when appropriate.
 
     // Step 1: Locate the inode for this file as in Step 1 of delete.
-
+        int in = -1;
+        
+        //Look for inode with matching name
+        for(int i=0; i<16; i++){
+            if(inodes[i].name == name){
+                in = i;
+            }
+        }
+        //if in is still -1 (inode not found)
+        if(in == -1){
+            printf("Could not find inode with matching name\n");
+            return 0;
+        }
     // Step 2: Seek to blockPointers[blockNum] and write buf to disk.
+        int blockPtr = inodes[in].blockPointers[blockNum];
+        fseek(file, blockPtr, SEEK_SET);
+        fputs(buf, file);
 }
 
 
