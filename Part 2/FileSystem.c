@@ -291,11 +291,11 @@ int delete(unsigned char name[8]){
 }
 
 int ls(){
-	//read from file
-	//===================
+	
 	long readSize = 1024;
     unsigned char superBlock[readSize];
     size_t result;
+	fseek(file, 0, SEEK_SET);
     result = fread(superBlock, 1, readSize, file);
     printHex(superBlock,readSize);
     if(result != readSize) {
@@ -364,50 +364,21 @@ int read(unsigned char name[8], long int blockNum, char buf[1024]){
             char* ptr;
             readBlockPointers[iBlockPointers1] = strtol(readBlockPointersChar, &ptr, 2);
         }
+	int address;
 	if(readBlockPointers[blockNum]==NULL){
+		printf("Block not found.");
 		return 0;
 	}
-	return 1;
-	// read this block from this file
-    // Return an error if and when appropriate. For instance, make sure
-    // blockNum does not exceed size-1.
-	// Step 1: Locate the inode for this file as in Step 1 of delete.
-    //Look for inode with matching name
-	
-	/*
-	int in = -1;
-    for(int i=0; i<16; i++){
-        if(strcmp(inodes[i].name, name)){
-            in = i;
-        }
-    }
-    //if in is still -1 (inode not found)
-    if(in == -1){
-        printf("Could not find inode with matching name\n");
-		return -1;
-    }
-	//if invalid blocknum
-	if(blockNum>7 || &inodes[in].blockPointers[blockNum] == NULL) {
-		printf("Invalid block number\n");
-		return -1;
-	}
-	//if block exists, read from file
-	
-	//check if block is potentially less than 1KB
-	long readSize;
-	if(&inodes[in].blockPointers[blockNum+1]== NULL || blockNum == 7)
-		readSize = inodes[in].size - (blockNum*1024); //get the leftover block size =================================================pls check calculation
 	else
-		readSize = 1024;
+		address = readBlockPointers[blockNum];
+	long readSize;
+	readSize = 1024;
 	// Step 2: Seek to blockPointers[blockNum] and read the block
     // from disk to buf.
     size_t result;
+	fseek(file, address, SEEK_SET);
     result = fread(buf, 1, readSize, file);*/
-    /*if(result != readSize) {
-        printf("Read 1024 Error\n");
-        exit(1);
-    }*/
-    return 1;
+	return 1;
 }
 
 int write(unsigned char name[8], long int blockNum, char buf[1024]){
