@@ -59,7 +59,7 @@ void myFileSystem(char* diskName){
     size_t result;
     //printf("Storing start:\n");
     result = fread(superBlock, 1, readSize, file);
-    printf("result: %d\n",result);
+    printf("result: %ld\n",result);
     printHex(superBlock,readSize);
     if(result != readSize) {
         printf("Read 1024 Error\n");
@@ -407,19 +407,19 @@ int main(int argc, char *argv[]){
                 fscanf(fileINPUT, "%s", arg);
 
                 //Create
-                if(buffer[0] = 'C'){
+                if(buffer[0] == 'C'){
                     printf("Creating file with name %s and size %s\n", fileName, arg);
                     create(fileName, (long)atol(arg));
                 }
                 //Write
-                else if(buffer[0] = 'W'){
+                else if(buffer[0] == 'W'){
                     char dummyBuffer[1024];
                     for(int i=0; i<1024; i++){dummyBuffer[i] = '1';}
                     printf("Writing to block number %s in file with name %s\n", fileName, arg);
                     write(fileName, (long)atol(arg), dummyBuffer);
                 }
                 //Read
-                else if(buffer[0] = 'R'){
+                else if(buffer[0] == 'R'){
                     printf("Reading block %s from file %s\n", arg, fileName);
                     char buf[1024];
                     read(fileName, (long)atol(arg), buf);
