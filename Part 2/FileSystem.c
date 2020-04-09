@@ -322,6 +322,7 @@ int ls(){
 int read(unsigned char name[8], long int blockNum, char buf[1024]){
 	//check if blocknum valid
 	if(blockNum > 7) {
+		printf("Invalid Block Number.");
 		return 0;
 	}
 
@@ -355,18 +356,17 @@ int read(unsigned char name[8], long int blockNum, char buf[1024]){
 	}
 	readLocation += 12//move to pointers
 	int32_t readBlockPointers[8];//check if block exists
-        for(int iBlockPointers1 = 0; iBlockPointers1 < 8; iBlockPointers1++) {
+    for(int iBlockPointers1 = 0; iBlockPointers1 < 8; iBlockPointers1++) {
             char readBlockPointersChar[4];
             for(int iBlockPointers2 = 0; iBlockPointers2 < 4; iBlockPointers2++) {
-				if(superBlock[readLocation + iBlockPointers2 + (iBlockPointers1*4) == NULL)
-					return 0
-				
                 readBlockPointersChar[iBlockPointers2] = superBlock[readLocation + iBlockPointers2 + (iBlockPointers1*4)];
             }
             char* ptr;
             readBlockPointers[iBlockPointers1] = strtol(readBlockPointersChar, &ptr, 2);
         }
-		
+	if(readBlockPointers[blockNum]==NULL){
+		return 0;
+	}
 	return 1;
 	// read this block from this file
     // Return an error if and when appropriate. For instance, make sure
