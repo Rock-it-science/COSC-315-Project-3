@@ -31,9 +31,9 @@ struct inode inodes[16];
 FILE* file;
 
 void myFileSystem(char* diskName){
-    printf("myFileSystem start:\n");
-    printf("%s\n",diskName);
-    printf("Trying to read: %s\n",diskName);
+    //printf("myFileSystem start:\n");
+    //printf("%s\n",diskName);
+    //printf("Trying to read: %s\n",diskName);
     // Open the file with name diskName
 
     file = fopen(diskName,"rb");
@@ -41,7 +41,7 @@ void myFileSystem(char* diskName){
         printf("Read File Error\n");
         exit(1);
     }
-    printf("Read Complete \n");
+    //printf("Read Complete \n");
     
     // Read the first 1KB and parse it to structs/objecs representing the super block
     // 	An easy way to work with the 1KB memory chunk is to move a pointer to a
@@ -113,7 +113,7 @@ void myFileSystem(char* diskName){
         inodes[i].used = readUsed;
     }
     
-    printf("Success importing file system\n");
+    //printf("Success importing file system\n");
 
     // Be sure to close the file in a destructor or otherwise before
     // the process exits.
@@ -287,15 +287,15 @@ int delete(unsigned char name[8]){
 }
 
 int ls(){
-	printf("Files in system:");
+	printf("Files in system:\n");
     for(int i = 0; i < 16; i++) {
 		if(inodes[i].used==1)
-			printf("%s %d%s\n", inodes[i].name, inodes[i].size,"BYTES");
+			printf("|--%s %d Blocks\n", inodes[i].name, inodes[i].size);
     }
 	return 1;
 }
 
-int read(unsigned char name[8], long int blockNum, char * buf[1024]){
+int read(unsigned char name[8], long int blockNum, char buf[1024]){
     // read this block from this file
     // Return an error if and when appropriate. For instance, make sure
     // blockNum does not exceed size-1.
@@ -374,14 +374,14 @@ int main(int argc, char *argv[]){
     
     printf("Writing file\n");
     write("file1", 1, "Hello World");
-    //myFileSystem(diskName);
+    myFileSystem(diskName);
     
     printf("Reading file\n");
     char buf[1024];
     read("file1", 1, buf);
     printf("%s", buf);
     printf("\n");
-    //myFileSystem(diskName);
+    myFileSystem(diskName);
 
     ls();
     fclose(file);
