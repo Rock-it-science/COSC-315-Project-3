@@ -175,7 +175,7 @@ int create(char name[8], long int size){
                 freeBlocks++;
             }
         }
-        if(freeBlocks != size) {
+        if(freeBlocks < size) {
             printf("Not enough Free Blocks\n");
             exit(1);
         }
@@ -369,7 +369,7 @@ int main(int argc, char *argv[]){
     myFileSystem(diskName);
     
     printf("Creating file\n");
-    create("file1", 2);
+    create("file1", 3);
     
     printf("Writing file\n");
     write("file1", 1, "Hello World");
