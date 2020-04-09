@@ -26,15 +26,15 @@
 
 * MyFileSystem:
 
-    Takes diskName as input. The first  thing this function does is open the file with fileName to a global variable `file`.
+    Takes diskName as input. The first  thing this function does is open the file with fileName to a global variable `file`. Segment Fault™
 
     ...
 
 * Create:
 
-* ls:
+* ls: Reads superblock for file names. Checks if they are empty to not print blank lines. Due to issues with writing to the superblock, this function does not work as the data is stored in structs instead of directly on the superblock.
 
-* read:
+* read: Reads superblock to see if file with the input name and if the block exists by checking the inode. Due to issues with writing to the superblock, this function does not work as the data is stored in structs instead of directly on the superblock.
 
 * write:
 
