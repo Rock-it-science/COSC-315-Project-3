@@ -17,20 +17,39 @@
   * Wrote ls and read functions
   
   * Helped fixing bugs and refactoring code
+  
+  * Helped with documentation
     
 * Winter:
   * Wrote myFileSystem and create functions
+  
   * Helped fixing bugs and refactoring code
+  
+  * Helped a bit with documentation
 
 ## Design Choices:
 
 * MyFileSystem:
 
-    Takes diskName as input. The first  thing this function does is open the file with fileName to a global variable `file`. Segment Fault™
+    Takes diskName as input. The first  thing this function does is open the file with fileName to a global variable `file`. The function then reads the superblock of the disk and stores it into an unsigned char array of size 1024. After that the function goes skips the first 128 bytes and starts reading the inodes. Multiple for loops are used for this process. outline:
 
-    ...
+        Loop through 16 inodes in the disk
+            read 8 bytes for name
+            read 4 bytes for size
+            Loop through 8 times for each block pointer
+                Read 4 bytes for each block pointer
+            read 4 bytes for used
+    
+    Then the function saves these inodes to a global variable called inodes
 
 * Create:
+    The create functions first loops through all the free blocks to see if there is enough space. Then it loops through the file names to see if the new name is identical to any of the previous names. The function then adds to the inodes global varible and then starts the process of writing to the disk. outline:
+        Loop through 16 inodes in the program
+            write 8 bytes for name
+            write 4 bytes for size
+            Loop through each block pointer in inode
+                write 4 bytes for each block pointer
+            write 4 bytes for used
 
 * delete: Firstly, this function reads the suprblock into a buffer to be used in this function, storing the data in a char array called super.
     
