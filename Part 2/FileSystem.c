@@ -72,7 +72,7 @@ void myFileSystem(char* diskName){
     //printf("Storing start:\n");
     result = fread(superBlock, 1, readSize, file);
     //printf("result: %ld\n",result);
-    printHex(superBlock,readSize);
+    //printHex(superBlock,readSize);
     if(result != readSize) {
         printf("Read 1024 Error\n");
         exit(1);
@@ -130,7 +130,7 @@ void myFileSystem(char* diskName){
         memcpy(inodes[i].blockPointers, readBlockPointers, sizeof(readBlockPointers));
         inodes[i].used = readUsed;
     }
-    
+    //printAllinode();
     //printf("Success importing file system\n");
 
     // Be sure to close the file in a destructor or otherwise before
@@ -156,7 +156,7 @@ int create(char name[8], long int size){
             found = true;
         }
     }
-    printf("using iNode %d\n",toUse);
+    //printf("using iNode %d\n",toUse);
 
     if(!found) {
         printf("No Empty inode found");
@@ -187,7 +187,7 @@ int create(char name[8], long int size){
     int32_t blocksToWrite[size];
     for(int i = 0; (i < 128) && (freeBlocks < size); i++) {
         if(freeBlock[i] == 0) {
-            blocksToWrite[freeBlocks] = i*1024;
+            blocksToWrite[freeBlocks] = i;
             freeBlocks++;
         }
     }
@@ -204,7 +204,7 @@ int create(char name[8], long int size){
     inodes[toUse].used = 1;
     inodes[toUse].size = size;
     for(int i = 0; i < size; i++) {
-        inodes[toUse].blockPointers[i] = blocksToWrite[i];
+        inodes[toUse].blockPointers[i] = blocksToWrite[i]*1024;
     }
 
     // Step 4: Write the entire super block back to disk.
@@ -251,13 +251,13 @@ int create(char name[8], long int size){
             }
             writeLocation += 4;
         }
-        printAllinode();
-        printf("\nCREATE TOWRITE: \n");
-        printHex(toWrite,1024);
+        //printAllinode();
+        //printf("\nCREATE TOWRITE: \n");
+        //printHex(toWrite,1024);
         fseek(file, 0, SEEK_SET);
         fwrite(toWrite, 1, 1024, file);
 
-        printf("\nCREATE TOWRITE RESULT:\n");
+        //printf("\nCREATE TOWRITE RESULT:\n");
         long readSize2 = 1024;
         unsigned char superBlock[readSize2];
         size_t result2;
@@ -265,12 +265,12 @@ int create(char name[8], long int size){
         fseek(file,0,SEEK_SET);
         result2 = fread(superBlock, 1, readSize2, file);
         //printf("result: %ld\n",result);
-        printHex(superBlock,readSize2);
+        //printHex(superBlock,readSize2);
         if(result2 != readSize2) {
             printf("Read 1024 Error\n");
             exit(1);
         }
-        printAllinode();
+        //printAllinode();
 
 
 
@@ -327,7 +327,7 @@ int ls(){
     size_t result;
 	fseek(file, 0, SEEK_SET);
     result = fread(superBlock, 1, readSize, file);
-    printHex(superBlock,readSize);
+    //printHex(superBlock,readSize);
     if(result != readSize) {
         printf("Read 1024 Error\n");
         exit(1);
@@ -452,6 +452,7 @@ int main(int argc, char *argv[]){
     while(fscanf(fileINPUT, "%s", buffer) == 1){
         //ls
         if(buffer[0] == 'L'){
+            printAllinode();
             ls();
         }
         else{
@@ -493,6 +494,7 @@ int main(int argc, char *argv[]){
         }
         //myFileSystem(diskName);
     }
+
     fclose(fileINPUT);
     fclose(file);
 }
