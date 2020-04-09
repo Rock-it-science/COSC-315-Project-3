@@ -31,9 +31,9 @@ struct inode inodes[16];
 FILE* file;
 
 void myFileSystem(char* diskName){
-    printf("myFileSystem start:\n");
-    printf("%s",diskName);
-    printf("Trying to read: %s\n",diskName);
+    //printf("myFileSystem start:\n");
+    //printf("%s",diskName);
+    //printf("Trying to read: %s\n",diskName);
     // Open the file with name diskName
 
     file = fopen(diskName,"rb+");
@@ -45,7 +45,7 @@ void myFileSystem(char* diskName){
         printf("Write File Error");
         exit(1);
     }
-    printf("Read Complete \n");
+    //printf("Read Complete \n");
     
     // Read the first 1KB and parse it to structs/objecs representing the super block
     // 	An easy way to work with the 1KB memory chunk is to move a pointer to a
@@ -59,7 +59,7 @@ void myFileSystem(char* diskName){
     size_t result;
     //printf("Storing start:\n");
     result = fread(superBlock, 1, readSize, file);
-    printf("result: %ld\n",result);
+    //printf("result: %ld\n",result);
     printHex(superBlock,readSize);
     if(result != readSize) {
         printf("Read 1024 Error\n");
@@ -173,7 +173,7 @@ int create(char name[8], long int size){
     int freeBlocks = 0;
     bool foundAll;
     int32_t blocksToWrite[size];
-    for(int i = 0; (i < 128) & (freeBlocks < size); i++) {
+    for(int i = 0; (i < 128) && (freeBlocks < size); i++) {
         if(freeBlock[i] == 0) {
             blocksToWrite[freeBlocks] = i;
             freeBlocks++;
@@ -240,7 +240,7 @@ int create(char name[8], long int size){
             writeLocation += 4;
         }
 
-        printHex(toWrite,1024);
+        //printHex(toWrite,1024);
         fseek(file, 0, SEEK_SET);
         fputs(toWrite, file);
 
@@ -423,7 +423,7 @@ int main(int argc, char *argv[]){
                 }
             }
         }
-        myFileSystem(diskName);
+        //myFileSystem(diskName);
     }
     fclose(fileINPUT);
 }
