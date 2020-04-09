@@ -260,7 +260,7 @@ int delete(unsigned char name[8]){
         
         //Look for inode with matching name
         for(int i=0; i<16; i++){
-            if(inodes[i].name == name){
+            if(strcmp(inodes[i].name, name)){
                 in = i;
             }
         }
@@ -303,7 +303,7 @@ int read(unsigned char name[8], long int blockNum, char buf[1024]){
     //Look for inode with matching name
 	int in = -1;
     for(int i=0; i<16; i++){
-        if(inodes[i].name == name){
+        if(strcmp(inodes[i].name, name)){
             in = i;
         }
     }
@@ -345,7 +345,7 @@ int write(unsigned char name[8], long int blockNum, char buf[1024]){
         
         //Look for inode with matching name
         for(int i=0; i<16; i++){
-            if(inodes[i].name == name){
+            if(strcmp(inodes[i].name, name)){
                 in = i;
             }
         }
