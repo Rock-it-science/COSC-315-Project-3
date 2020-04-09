@@ -1,6 +1,6 @@
 Member contributions:
     
-    * Completed by Will
+    Completed by Will
 
 Design choices:
 
