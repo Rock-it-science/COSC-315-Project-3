@@ -15,6 +15,8 @@ struct inode {
 };
 
 
+
+
 void printHex(unsigned char data[], int size) { //prints to console for testing purposes
     printf("Printing start:\n");
     printf("Size of data: %i\n",size);
@@ -26,6 +28,20 @@ void printHex(unsigned char data[], int size) { //prints to console for testing 
 
 //global variable for list of inodes
 struct inode inodes[16];
+
+void printAllinode() {
+    for(int i = 0; i < 16; i++) {
+        printf("\ninode #%d:\n",i);
+        printf("Name: %s\n",inodes[i].name);
+        printf("Size: %d\n",inodes[i].size);
+        printf("Used: %d\n",inodes[i].used);
+        printf("Block Pointers: ");
+        for(int j = 0; j < 8; j++) {
+            printf(" %d",inodes[i].blockPointers[j]);
+        }
+        printf("\n");
+    }
+}
 
 //Global file
 FILE* file;
@@ -39,10 +55,6 @@ void myFileSystem(char* diskName){
     file = fopen(diskName,"rb+");
     if(file == NULL) {
         printf("Read File Error\n");
-        exit(1);
-    }
-    if(file == NULL) {
-        printf("Write File Error");
         exit(1);
     }
     //printf("Read Complete \n");
@@ -239,10 +251,28 @@ int create(char name[8], long int size){
             }
             writeLocation += 4;
         }
-
-        //printHex(toWrite,1024);
+        printAllinode();
+        printf("\nCREATE TOWRITE: \n");
+        printHex(toWrite,1024);
         fseek(file, 0, SEEK_SET);
-        fputs(toWrite, file);
+        fwrite(toWrite, 1, 1024, file);
+
+        printf("\nCREATE TOWRITE RESULT:\n");
+        long readSize2 = 1024;
+        unsigned char superBlock[readSize2];
+        size_t result2;
+        //printf("Storing start:\n");
+        fseek(file,0,SEEK_SET);
+        result2 = fread(superBlock, 1, readSize2, file);
+        //printf("result: %ld\n",result);
+        printHex(superBlock,readSize2);
+        if(result2 != readSize2) {
+            printf("Read 1024 Error\n");
+            exit(1);
+        }
+        printAllinode();
+
+
 
     return 1;
 }
@@ -496,4 +526,5 @@ int main(int argc, char *argv[]){
         //myFileSystem(diskName);
     }
     fclose(fileINPUT);
+    fclose(file);
 }
