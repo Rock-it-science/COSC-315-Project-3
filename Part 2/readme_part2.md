@@ -50,7 +50,9 @@
 * read: Reads superblock to see if file with the input name and if the block exists by checking the inode. Due to issues with writing to the superblock, this function does not work as the data is stored in structs instead of directly on the superblock.
 
 * write:
+    Like delete, this file must find the corresponding inode for the given name.
     
+    Once it has found the inode, it must calculate the pointer to the correct block. This is obtained from the blockPointers attribute on each inode. This block pointer is used as an offset to seek to the correct place in the file. After that, the buffer is written to the file.
 
 ## Compile/run insturctions:
   1. Setup input instructions in lab3.input.txt
