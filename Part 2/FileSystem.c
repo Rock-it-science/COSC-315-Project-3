@@ -371,13 +371,10 @@ int read(unsigned char name[8], long int blockNum, char buf[1024]){
 	}
 	else
 		address = readBlockPointers[blockNum];
-	long readSize;
-	readSize = 1024;
 	// Step 2: Seek to blockPointers[blockNum] and read the block
     // from disk to buf.
-    size_t result;
 	fseek(file, address, SEEK_SET);
-    result = fread(buf, 1, readSize, file);*/
+    result = fread(buf, 1, readSize, file);
 	return 1;
 }
 
