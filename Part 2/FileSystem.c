@@ -292,11 +292,6 @@ int delete(unsigned char name[8]){
 
 int ls(){
 	//read from file
-	file = fopen(diskName,"rb+");
-    if(file == NULL) {
-        printf("Read File Error\n");
-        exit(1);
-    }
 	//===================
 	long readSize = 1024;
     unsigned char superBlock[readSize];
@@ -308,9 +303,8 @@ int ls(){
         exit(1);
     }
     int readLocation = 128;//skip free block
-	boolean isused = false;
+	bool isused = false;
     for(int i = 0; i < 16; i++) {
-        char readName[8];
         for(int iname = 0; iname < 8; iname++) {
             if(superBlock[readLocation+iname] != NULL) {
 				printf(superBlock[readLocation+iname]);
@@ -322,28 +316,57 @@ int ls(){
         readLocation += 48; //skip rest of inode
 		isused = false;
     }
-	//===================
-	// printf("Files in system:\n");
-	// for(int i = 0; i < 16; i++) {
-		// boolean used = false;
-		// for(int nameC = 0; i < 8; i++) {
-			
-		// }
-	// }
-	
-    // for(int i = 0; i < 16; i++) {
-		// if(inodes[i].used==1)
-			// printf("|--%s %d Blocks\n", inodes[i].name, inodes[i].size);
-    // }
 	return 1;
 }
 
 int read(unsigned char name[8], long int blockNum, char buf[1024]){
-    // read this block from this file
+	long readSize = 1024;
+    unsigned char superBlock[readSize];
+    size_t result;
+    result = fread(superBlock, 1, readSize, file);
+	bool isused = false;
+    if(result != readSize) {
+        printf("Read 1024 Error\n");
+        exit(1);
+    }
+    int readLocation = 128;//skip free block
+    for(int i = 0; i < 16; i++) {
+		int x = 0;
+        for(int iname = 0; iname < 8; iname++) {
+            if(superBlock[readLocation+iname] == name[iname]) {
+				x++;
+			}
+			else
+				break;
+        }
+		if(x==8) {
+			isused = true;
+			break;
+		}
+        readLocation += 48; //skip rest of inode
+    }
+	if(!isused){ //name not found
+		return 0;
+	}
+	readLocation += 12//move to pointers
+	int32_t readBlockPointers[8];
+        for(int iBlockPointers1 = 0; iBlockPointers1 < 8; iBlockPointers1++) {
+            char readBlockPointersChar[4];
+            for(int iBlockPointers2 = 0; iBlockPointers2 < 4; iBlockPointers2++) {
+                readBlockPointersChar[iBlockPointers2] = superBlock[readLocation + iBlockPointers2 + (iBlockPointers1*4)];
+            }
+            char* ptr;
+            readBlockPointers[iBlockPointers1] = strtol(readBlockPointersChar, &ptr, 2);
+        }
+	
+	return 1;
+	// read this block from this file
     // Return an error if and when appropriate. For instance, make sure
     // blockNum does not exceed size-1.
 	// Step 1: Locate the inode for this file as in Step 1 of delete.
     //Look for inode with matching name
+	
+	/*
 	int in = -1;
     for(int i=0; i<16; i++){
         if(strcmp(inodes[i].name, name)){
@@ -371,7 +394,7 @@ int read(unsigned char name[8], long int blockNum, char buf[1024]){
 	// Step 2: Seek to blockPointers[blockNum] and read the block
     // from disk to buf.
     size_t result;
-    result = fread(buf, 1, readSize, file);
+    result = fread(buf, 1, readSize, file);*/
     /*if(result != readSize) {
         printf("Read 1024 Error\n");
         exit(1);
