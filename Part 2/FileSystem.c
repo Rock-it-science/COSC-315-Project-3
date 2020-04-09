@@ -144,7 +144,7 @@ int create(char name[8], long int size){
             found = true;
         }
     }
-    printf("ToUse = %d\n",toUse);
+    printf("using iNode %d\n",toUse);
 
     if(!found) {
         printf("No Empty inode found");
@@ -153,16 +153,14 @@ int create(char name[8], long int size){
 
     // Also make sure that no other file in use with the same name exists.
     for(int i = 0; i < 16; i++) {
-        if(0 == strcmp(inodes[i].name,name)) {
+        if(strcmp(inodes[i].name,name) == 0) {
             printf("File name Exists");
             exit(1);
         }
     }
 
-
     // Step 2: Look for a number of free blocks equal to the size variable
     // passed to this method. If not enough free blocks exist, then return an error.
-    
     fseek(file, 0, SEEK_SET);//Move cursor to start of file
     long readSize = 128;
     unsigned char freeBlock[readSize];
@@ -171,12 +169,11 @@ int create(char name[8], long int size){
     if(result != readSize) {
         printf("Read free Error, read %ld values\n", result);
         exit(1);
-    }
-
+    }  
     int freeBlocks = 0;
     bool foundAll;
     int32_t blocksToWrite[size];
-    for(int i = 0; (i < 128) || (freeBlocks == size); i++) {
+    for(int i = 0; (i < 128) & (freeBlocks < size); i++) {
         if(freeBlock[i] == 0) {
             blocksToWrite[freeBlocks] = i;
             freeBlocks++;
@@ -186,7 +183,6 @@ int create(char name[8], long int size){
         printf("Not enough Free Blocks\n");
         exit(1);
     }
-
 
     // Step 3: Now we know we have an inode and free blocks necessary to
     // create the file. So mark the inode and blocks as used and update the rest of
