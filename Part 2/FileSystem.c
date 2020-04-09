@@ -366,19 +366,22 @@ int write(unsigned char name[8], long int blockNum, char buf[1024]){
 
 int main(int argc, char *argv[]){
     char diskName[] = "disk0";
-    myFileSystem(diskName);
+    //myFileSystem(diskName);
     
     printf("Creating file\n");
     create("file1", 1);
+    /myFileSystem(diskName);
     
     printf("Writing file\n");
     write("file1", 1, "Hello World");
+    //myFileSystem(diskName);
     
     printf("Reading file\n");
     char buf[1024];
     read("file1", 1, buf);
     printf("%s", buf);
     printf("\n");
+    //myFileSystem(diskName);
 
     ls();
 }
