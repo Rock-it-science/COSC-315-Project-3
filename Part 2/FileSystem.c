@@ -291,11 +291,50 @@ int delete(unsigned char name[8]){
 }
 
 int ls(){
-	printf("Files in system:\n");
-    for(int i = 0; i < 16; i++) {
-		if(inodes[i].used==1)
-			printf("|--%s %d Blocks\n", inodes[i].name, inodes[i].size);
+	//read from file
+	file = fopen(diskName,"rb+");
+    if(file == NULL) {
+        printf("Read File Error\n");
+        exit(1);
     }
+	//===================
+	long readSize = 1024;
+    unsigned char superBlock[readSize];
+    size_t result;
+    result = fread(superBlock, 1, readSize, file);
+    printHex(superBlock,readSize);
+    if(result != readSize) {
+        printf("Read 1024 Error\n");
+        exit(1);
+    }
+    int readLocation = 128;//skip free block
+	boolean isused = false;
+    for(int i = 0; i < 16; i++) {
+        char readName[8];
+        for(int iname = 0; iname < 8; iname++) {
+            if(superBlock[readLocation+iname] != NULL) {
+				printf(superBlock[readLocation+iname]);
+				isused = true;
+			}
+        }
+		if(isused)
+			printf("\n");
+        readLocation += 48; //skip rest of inode
+		isused = false;
+    }
+	//===================
+	// printf("Files in system:\n");
+	// for(int i = 0; i < 16; i++) {
+		// boolean used = false;
+		// for(int nameC = 0; i < 8; i++) {
+			
+		// }
+	// }
+	
+    // for(int i = 0; i < 16; i++) {
+		// if(inodes[i].used==1)
+			// printf("|--%s %d Blocks\n", inodes[i].name, inodes[i].size);
+    // }
 	return 1;
 }
 
