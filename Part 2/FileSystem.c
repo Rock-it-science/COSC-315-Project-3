@@ -187,7 +187,7 @@ int create(char name[8], long int size){
     int32_t blocksToWrite[size];
     for(int i = 0; (i < 128) && (freeBlocks < size); i++) {
         if(freeBlock[i] == 0) {
-            blocksToWrite[freeBlocks] = i;
+            blocksToWrite[freeBlocks] = i*1024;
             freeBlocks++;
         }
     }
