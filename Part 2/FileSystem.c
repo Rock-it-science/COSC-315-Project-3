@@ -316,6 +316,7 @@ int ls(){
         readLocation += 48; //skip rest of inode
 		isused = false;
     }
+    fseek(file, address, SEEK_SET);
 	return 1;
 }
 
@@ -323,12 +324,14 @@ int read(unsigned char name[8], long int blockNum, char buf[1024]){
 	//check if blocknum valid
 	if(blockNum > 7) {
 		printf("Invalid Block Number.");
+        fseek(file, address, SEEK_SET);
 		return 0;
 	}
 
 	long readSize = 1024;
     unsigned char superBlock[readSize];
     size_t result;
+    fseek(file, 0, SEEK_SET)
     result = fread(superBlock, 1, readSize, file);
 	bool isused = false;
     if(result != readSize) {
