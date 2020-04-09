@@ -117,7 +117,7 @@ void myFileSystem(char* diskName){
 
     // Be sure to close the file in a destructor or otherwise before
     // the process exits.
-    fclose(file);
+    //fclose(file);
 }
 
 int create(char name[8], long int size){
@@ -295,7 +295,7 @@ int ls(){
 	return 1;
 }
 
-int read(unsigned char name[8], long int blockNum, char buf[1024]){
+int read(unsigned char name[8], long int blockNum, char * buf[1024]){
     // read this block from this file
     // Return an error if and when appropriate. For instance, make sure
     // blockNum does not exceed size-1.
@@ -345,7 +345,7 @@ int write(unsigned char name[8], long int blockNum, char buf[1024]){
         
         //Look for inode with matching name
         for(int i=0; i<16; i++){
-            if(strcmp(inodes[i].name, name)){
+            if(strcmp(inodes[i].name, name) == 0){
                 in = i;
             }
         }
@@ -366,11 +366,11 @@ int write(unsigned char name[8], long int blockNum, char buf[1024]){
 
 int main(int argc, char *argv[]){
     char diskName[] = "disk0";
-    //myFileSystem(diskName);
+    myFileSystem(diskName);
     
     printf("Creating file\n");
     create("file1", 1);
-    /myFileSystem(diskName);
+    myFileSystem(diskName);
     
     printf("Writing file\n");
     write("file1", 1, "Hello World");
@@ -384,4 +384,5 @@ int main(int argc, char *argv[]){
     //myFileSystem(diskName);
 
     ls();
+    fclose(file);
 }
