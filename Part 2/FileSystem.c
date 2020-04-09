@@ -53,20 +53,20 @@ void myFileSystem(char* diskName){
     long readSize = 1024;
     unsigned char superBlock[readSize];
     size_t result;
-    printf("Storing start:\n");
+    //printf("Storing start:\n");
     result = fread(superBlock, 1, readSize, file);
     if(result != readSize) {
         printf("Read 1024 Error\n");
         exit(1);
     }
-    printf("Storing complete:\n");
+    //printf("Storing complete\n");
 
-    printHex(superBlock,readSize);
+    //printHex(superBlock,readSize);
 
     
 
-    printf("Reading inode start:\n");
-    printf("%li\n",sizeof(inodes));
+    //printf("Reading inode start:\n");
+    //printf("%li\n",sizeof(inodes));
 
     int readLocation = 128; // 128 for free block list
 
@@ -113,6 +113,8 @@ void myFileSystem(char* diskName){
         inodes[i].used = readUsed;
     }
     
+    printf("Success importing file system\n");
+
     // Be sure to close the file in a destructor or otherwise before
     // the process exits.
     fclose(file);
@@ -126,55 +128,58 @@ int create(char name[8], long int size){
     // Step 1: Look for a free inode by searching the collection of objects
     // representing inodes within the super block object.
     // If none exist, then return an error.
-    // Also make sure that no other file in use with the same name exists.
 
-    bool found = false;
-    int toUse = 0;
-    for(int i = 0; i < 16 || found; i++) {
-        if(inodes[i].used == 0) {
-            toUse = i;
-            found = true;
+        bool found = false;
+        int toUse = 0;
+        for(int i = 0; i < 16; i++) {
+            if(inodes[i].used == 0) {
+                //Mark as free and set found to true
+                toUse = i;
+                found = true;
+            }
         }
-    }
-    if(found) {
-        printf("No Empty inode found");
-        exit(1);
-    }
-    for(int i = 0; i < 16; i++) {
-        if(0 == strcmp(inodes[i].name,name)) {
-            printf("File name Exists");
+
+        if(!found) {
+            printf("No Empty inode found");
             exit(1);
         }
-    }
+
+        // Also make sure that no other file in use with the same name exists.
+        for(int i = 0; i < 16; i++) {
+            if(0 == strcmp(inodes[i].name,name)) {
+                printf("File name Exists");
+                exit(1);
+            }
+        }
 
 
     // Step 2: Look for a number of free blocks equal to the size variable
     // passed to this method. If not enough free blocks exist, then return an error.
-    fseek(file, 0, SEEK_SET);
-    long readSize = 128;
-    unsigned char freeBlock[readSize];
-    size_t result;
-    result = fread(freeBlock, 1, readSize, file);
-    if(result != readSize) {
-        printf("Read free Error\n");
-        exit(1);
-    }
-
-    int freeBlocks = 0;
-    bool foundAll;
-    int32_t blocksToWrite[size];
-    for(int i = 0; (i < 128) || (freeBlocks == size); i++) {
-        if(freeBlock[i] == 0) {
-            blocksToWrite[freeBlocks] = i;
-            freeBlocks++;
-        }
-    }
-    if(freeBlocks != size) {
-        printf("Not enough Free Blocks");
-        exit(1);
-    }
-
     
+        fseek(file, 0, SEEK_SET);//Move cursor to start of file
+        long readSize = 1024;
+        unsigned char freeBlock[readSize];
+        size_t result;
+        /*result = fread(freeBlock, 1, 1, file);
+        if(result != readSize) {
+            printf("Read free Error, read %ld values\n", result);
+            exit(1);
+        }*/
+
+        int freeBlocks = 0;
+        bool foundAll;
+        int32_t blocksToWrite[size];
+        for(int i = 0; (i < 128) || (freeBlocks == size); i++) {
+            if(freeBlock[i] == 0) {
+                blocksToWrite[freeBlocks] = i;
+                freeBlocks++;
+            }
+        }
+        if(freeBlocks != size) {
+            printf("Not enough Free Blocks\n");
+            exit(1);
+        }
+
 
     // Step 3: Now we know we have an inode and free blocks necessary to
     // create the file. So mark the inode and blocks as used and update the rest of
@@ -191,49 +196,49 @@ int create(char name[8], long int size){
     //	An easy way to do this is to seek to the beginning of the disk
     //	and write the 1KB memory chunk.
 
-    unsigned char toWrite[1024];
-    for(int i = 0; i < size; i++) {
-        freeBlock[blocksToWrite[i]] = (unsigned char)1;
-    }
-    for(int i = 0; i < 128; i++) {
-        toWrite[i] = freeBlock[i];
-    }
-    int writeLocation = 128;
-    for(int i = 0; i < 16; i++) {
-        for(int iname = 0; iname < 8; iname++) {
-            toWrite[writeLocation + iname] = inodes[i].name[iname];
+        unsigned char toWrite[1024];
+        for(int i = 0; i < size; i++) {
+            freeBlock[blocksToWrite[i]] = (unsigned char)1;
         }
-        writeLocation += 8;
-
-        unsigned char writeSize[4];
-        //itoa(inodes[i].size,writeSize,2);
-        snprintf(writeSize,4,"%d",inodes[i].size);
-        for(int isize = 0; isize < 4; isize++) {
-            toWrite[writeLocation + isize] = writeSize[i];
+        for(int i = 0; i < 128; i++) {
+            toWrite[i] = freeBlock[i];
         }
-        writeLocation +=4;
-
-        for(int iBlockPointers1 = 0; iBlockPointers1 < 8; iBlockPointers1++) {
-            unsigned char writeBlockPointers[4];
-            //itoa(inodes[i].blockPointers[iBlockPointers1], writeBlockPointers,2);
-            snprintf(writeBlockPointers,4,"%d",inodes[i].blockPointers[iBlockPointers1]);
-            for(int iBlockPointers2; iBlockPointers2 < 4; iBlockPointers2++) {
-                toWrite[writeLocation + iBlockPointers2 + (iBlockPointers1*4)] = writeBlockPointers[iBlockPointers2];
+        int writeLocation = 128;
+        for(int i = 0; i < 16; i++) {
+            for(int iname = 0; iname < 8; iname++) {
+                toWrite[writeLocation + iname] = inodes[i].name[iname];
             }
-        }
-        writeLocation += 32;
+            writeLocation += 8;
 
-        unsigned char writeUsed[4];
-        //itoa(inodes[i].used,writeUsed,2);
-        snprintf(writeUsed,4,"%d",inodes[i].used);
-        for(int iused = 0; iused < 4; iused++) {
-            toWrite[writeLocation + iused] = writeUsed[iused];
-        }
-        writeLocation += 4;
-    }
+            unsigned char writeSize[4];
+            //itoa(inodes[i].size,writeSize,2);
+            snprintf(writeSize,4,"%d",inodes[i].size);
+            for(int isize = 0; isize < 4; isize++) {
+                toWrite[writeLocation + isize] = writeSize[i];
+            }
+            writeLocation +=4;
 
-    fseek(file, 0, SEEK_SET);
-    fputs(toWrite, file);
+            for(int iBlockPointers1 = 0; iBlockPointers1 < 8; iBlockPointers1++) {
+                unsigned char writeBlockPointers[4];
+                //itoa(inodes[i].blockPointers[iBlockPointers1], writeBlockPointers,2);
+                snprintf(writeBlockPointers,4,"%d",inodes[i].blockPointers[iBlockPointers1]);
+                for(int iBlockPointers2; iBlockPointers2 < 4; iBlockPointers2++) {
+                    toWrite[writeLocation + iBlockPointers2 + (iBlockPointers1*4)] = writeBlockPointers[iBlockPointers2];
+                }
+            }
+            writeLocation += 32;
+
+            unsigned char writeUsed[4];
+            //itoa(inodes[i].used,writeUsed,2);
+            snprintf(writeUsed,4,"%d",inodes[i].used);
+            for(int iused = 0; iused < 4; iused++) {
+                toWrite[writeLocation + iused] = writeUsed[iused];
+            }
+            writeLocation += 4;
+        }
+
+        fseek(file, 0, SEEK_SET);
+        fputs(toWrite, file);
 
     return 1;
 }
@@ -359,11 +364,19 @@ int write(char name[8], long int blockNum, char buf[1024]){
 
 
 
-
-
-
-//main arguments:         moved here for testing
 int main(int argc, char *argv[]){
     char diskName[] = "disk0";
     myFileSystem(diskName);
+    
+    printf("Creating file\n");
+    create("file1", 2);
+    
+    printf("Writing file\n");
+    write("file1", 1, "Hello World");
+    
+    char buf[1024];
+    read("file1", 1, buf);
+    printf("%s", buf);
+
+    ls();
 }
