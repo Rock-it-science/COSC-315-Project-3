@@ -243,7 +243,7 @@ int create(char name[8], long int size){
     return 1;
 }
 
-int delete(char name[8]){
+int delete(unsigned char name[8]){
     // Delete the file with this name
 
     //Step 0: read super block
@@ -295,7 +295,7 @@ int ls(){
 	return 1;
 }
 
-int read(char name[8], long int blockNum, char buf[1024]){
+int read(unsigned char name[8], long int blockNum, char buf[1024]){
     // read this block from this file
     // Return an error if and when appropriate. For instance, make sure
     // blockNum does not exceed size-1.
@@ -336,7 +336,7 @@ int read(char name[8], long int blockNum, char buf[1024]){
     return 1;
 }
 
-int write(char name[8], long int blockNum, char buf[1024]){
+int write(unsigned char name[8], long int blockNum, char buf[1024]){
     // write this block to this file
     // Return an error if and when appropriate.
 
