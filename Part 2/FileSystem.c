@@ -36,7 +36,7 @@ void myFileSystem(char* diskName){
     //printf("Trying to read: %s\n",diskName);
     // Open the file with name diskName
 
-    file = fopen(diskName,"rb");
+    file = fopen(diskName,"rw");
     if(file == NULL) {
         printf("Read File Error\n");
         exit(1);
@@ -365,24 +365,61 @@ int write(unsigned char name[8], long int blockNum, char buf[1024]){
 
 
 int main(int argc, char *argv[]){
-    char diskName[] = "disk0";
-    myFileSystem(diskName);
+    //Read input file
+    FILE* fileINPUT = fopen("lab3input.txt", "r");
     
-    printf("Creating file\n");
-    create("file1", 1);
-    myFileSystem(diskName);
-    
-    printf("Writing file\n");
-    write("file1", 1, "Hello World");
-    myFileSystem(diskName);
-    
-    printf("Reading file\n");
-    char buf[1024];
-    read("file1", 1, buf);
-    printf("%s", buf);
-    printf("\n");
+    //first get diskname
+    char* diskName;
+    fscanf(fileINPUT, "%s", diskName);
+
+    //Update fileSystem
     myFileSystem(diskName);
 
-    ls();
-    fclose(file);
+    //Iterate through rest of the file
+    char buffer[sizeof(char)*32];
+    while(fscanf(fileINPUT, "%s", buffer) == 1){
+        //ls
+        if(buffer[0] == 'L'){
+            ls();
+        }
+        else{
+            //Get fileName
+            char fileName[8];
+            fscanf(fileINPUT, "%s", fileName);
+
+            //delete
+            if(buffer[0] == 'D'){
+                printf("Deleting file %s\n", fileName);
+                delete(fileName);
+            }
+
+            else{
+                //Get final argument
+                char arg[8];
+                fscanf(fileINPUT, "%s", arg);
+
+                //Create
+                if(buffer[0] = 'C'){
+                    printf("Creating file with name %s and size %s\n", fileName, arg);
+                    create(fileName, (long)atol(arg));
+                }
+                //Write
+                else if(buffer[0] = 'W'){
+                    char dummyBuffer[1024];
+                    for(int i=0; i<1024; i++){dummyBuffer[i] = '1';}
+                    printf("Writing to block number %s in file with name %s\n", fileName, arg);
+                    write(fileName, (long)atol(arg), dummyBuffer);
+                }
+                //Read
+                else if(buffer[0] = 'R'){
+                    printf("Reading block %s from file %s\n", arg, fileName);
+                    char buf[1024];
+                    read(fileName, (long)atol(arg), buf);
+                    printf("file contents: %s\n", buf);
+                }
+            }
+        }
+        myFileSystem(diskName);
+    }
+    fclose(fileINPUT);
 }
