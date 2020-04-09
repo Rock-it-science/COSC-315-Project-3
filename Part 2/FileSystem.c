@@ -32,13 +32,17 @@ FILE* file;
 
 void myFileSystem(char* diskName){
     printf("myFileSystem start:\n");
-    printf("%s\n",diskName);
+    printf("%s",diskName);
     printf("Trying to read: %s\n",diskName);
     // Open the file with name diskName
 
-    file = fopen(diskName,"rb");
+    file = fopen(diskName,"rb+");
     if(file == NULL) {
         printf("Read File Error\n");
+        exit(1);
+    }
+    if(file == NULL) {
+        printf("Write File Error");
         exit(1);
     }
     printf("Read Complete \n");
@@ -55,13 +59,15 @@ void myFileSystem(char* diskName){
     size_t result;
     //printf("Storing start:\n");
     result = fread(superBlock, 1, readSize, file);
+    printf("result: %d\n",result);
+    printHex(superBlock,readSize);
     if(result != readSize) {
         printf("Read 1024 Error\n");
         exit(1);
     }
     //printf("Storing complete\n");
 
-    //printHex(superBlock,readSize);
+    
 
     
 
@@ -129,56 +135,57 @@ int create(char name[8], long int size){
     // representing inodes within the super block object.
     // If none exist, then return an error.
 
-        bool found = false;
-        int toUse = 0;
-        for(int i = 0; i < 16; i++) {
-            if(inodes[i].used == 0) {
-                //Mark as free and set found to true
-                toUse = i;
-                found = true;
-            }
+    bool found = false;
+    int toUse = 0;
+    for(int i = 0; (i < 16) && !found; i++) {
+        if(inodes[i].used == 0) {
+            //Mark as free and set found to true
+            toUse = i;
+            found = true;
         }
+    }
+    printf("ToUse = %d\n",toUse);
 
-        if(!found) {
-            printf("No Empty inode found");
+    if(!found) {
+        printf("No Empty inode found");
+        exit(1);
+    }
+
+    // Also make sure that no other file in use with the same name exists.
+    for(int i = 0; i < 16; i++) {
+        if(0 == strcmp(inodes[i].name,name)) {
+            printf("File name Exists");
             exit(1);
         }
-
-        // Also make sure that no other file in use with the same name exists.
-        for(int i = 0; i < 16; i++) {
-            if(0 == strcmp(inodes[i].name,name)) {
-                printf("File name Exists");
-                exit(1);
-            }
-        }
+    }
 
 
     // Step 2: Look for a number of free blocks equal to the size variable
     // passed to this method. If not enough free blocks exist, then return an error.
     
-        fseek(file, 0, SEEK_SET);//Move cursor to start of file
-        long readSize = 1024;
-        unsigned char freeBlock[readSize];
-        size_t result;
-        /*result = fread(freeBlock, 1, 1, file);
-        if(result != readSize) {
-            printf("Read free Error, read %ld values\n", result);
-            exit(1);
-        }*/
+    fseek(file, 0, SEEK_SET);//Move cursor to start of file
+    long readSize = 128;
+    unsigned char freeBlock[readSize];
+    size_t result;
+    result = fread(freeBlock, 1, readSize, file);
+    if(result != readSize) {
+        printf("Read free Error, read %ld values\n", result);
+        exit(1);
+    }
 
-        int freeBlocks = 0;
-        bool foundAll;
-        int32_t blocksToWrite[size];
-        for(int i = 0; (i < 128) || (freeBlocks == size); i++) {
-            if(freeBlock[i] == 0) {
-                blocksToWrite[freeBlocks] = i;
-                freeBlocks++;
-            }
+    int freeBlocks = 0;
+    bool foundAll;
+    int32_t blocksToWrite[size];
+    for(int i = 0; (i < 128) || (freeBlocks == size); i++) {
+        if(freeBlock[i] == 0) {
+            blocksToWrite[freeBlocks] = i;
+            freeBlocks++;
         }
-        if(freeBlocks < size) {
-            printf("Not enough Free Blocks\n");
-            exit(1);
-        }
+    }
+    if(freeBlocks < size) {
+        printf("Not enough Free Blocks\n");
+        exit(1);
+    }
 
 
     // Step 3: Now we know we have an inode and free blocks necessary to
@@ -237,6 +244,7 @@ int create(char name[8], long int size){
             writeLocation += 4;
         }
 
+        printHex(toWrite,1024);
         fseek(file, 0, SEEK_SET);
         fputs(toWrite, file);
 
@@ -374,7 +382,7 @@ int main(int argc, char *argv[]){
     
     printf("Writing file\n");
     write("file1", 1, "Hello World");
-    //myFileSystem(diskName);
+    myFileSystem(diskName);
     
     printf("Reading file\n");
     char buf[1024];
