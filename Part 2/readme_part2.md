@@ -32,9 +32,7 @@
 
 * Create:
 
-* delete:
-
-    Firstly, this function reads the suprblock into a buffer to be used in this function, storing the data in a char array called super.
+* delete: Firstly, this function reads the suprblock into a buffer to be used in this function, storing the data in a char array called super.
     
     Next, it finds the inode with the name matching what it was handed as an argument.
     To keep track of the corresponding inode, it simply stores its index in the inodes array.
