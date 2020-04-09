@@ -24,6 +24,19 @@
 
 ## Design Choices:
 
+* MyFileSystem:
+
+    Takes diskName as input. The first  thing this function does is open the file with fileName to a global variable `file`.
+
+    ...
+
+* Create:
+
+* ls:
+
+* read:
+
+* write:
 
 ## Compile/run insturctions:
   1. Setup input instructions in lab3.input.txt
