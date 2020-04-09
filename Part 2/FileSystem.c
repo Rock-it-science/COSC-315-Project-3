@@ -354,7 +354,7 @@ int read(unsigned char name[8], long int blockNum, char buf[1024]){
 	if(!isused){ //name not found
 		return 0;
 	}
-	readLocation += 12//move to pointers
+	readLocation += 12;//move to pointers
 	int32_t readBlockPointers[8];//check if block exists
     for(int iBlockPointers1 = 0; iBlockPointers1 < 8; iBlockPointers1++) {
             char readBlockPointersChar[4];
